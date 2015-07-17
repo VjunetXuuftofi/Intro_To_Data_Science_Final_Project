@@ -9,6 +9,9 @@ In this question, you need to:
 2) Select features (in the predictions procedure) and make predictions.
 
 """
+data = open('turnstile_weather_v2.csv', 'r')
+weather_turnstile = pandas.read_csv(data)
+print weather_turnstile
 
 def linear_regression(features, values):
     """
