@@ -9,22 +9,16 @@ In this question, you need to:
 2) Select features (in the predictions procedure) and make predictions.
 
 """
-data = open('turnstile_weather_v2.csv', 'r')
-weather_turnstile = pandas.read_csv(data)
-print weather_turnstile
+weather_turnstile = pandas.read_csv('turnstile_weather_v2.csv')
 
 def linear_regression(features, values):
-    """
-    Perform linear regression given a data set with an arbitrary number of features.
-
-    This can be the same code as in the lesson #3 exercise.
-    """
-
-    ###########################
-    ### YOUR CODE GOES HERE ###
-    ###########################
-
+    features = sm.add_constant(features)
+    model = sm.OLS(values, features)
+    results = model.fit()
+    intercept = results.params[0]
+    params = results.params[1:]
     return intercept, params
+
 
 def predictions(dataframe):
     '''
@@ -58,8 +52,8 @@ def predictions(dataframe):
     # See this page for more info about dummy variables:                                     #
     # http://pandas.pydata.org/pandas-docs/stable/generated/pandas.get_dummies.html          #
     ##########################################################################################
-    features = dataframe[['rain', 'precipi', 'Hour', 'meantempi']]
-    dummy_units = pandas.get_dummies(dataframe['UNIT'], prefix='unit')
+    features = dataframe[['hour', 'weekday']]
+    dummy_units = pandas.get_dummies(dataframe[['UNIT']], prefix='unit')
     features = features.join(dummy_units)
 
     # Values
@@ -67,6 +61,27 @@ def predictions(dataframe):
 
     # Perform linear regression
     intercept, params = linear_regression(features, values)
+    print intercept
+    print params
 
     predictions = intercept + np.dot(features, params)
     return predictions
+
+predictions = predictions(weather_turnstile)
+
+
+def compute_r_squared(data, predictions):
+    # Write a function that, given two input numpy arrays, 'data', and 'predictions,'
+    # returns the coefficient of determination, R^2, for the model that produced
+    # predictions.
+    #
+    # Numpy has a couple of functions -- np.mean() and np.sum() --
+    # that you might find useful, but you don't have to use them.
+
+    # YOUR CODE GOES HERE
+    numerator = np.sum(np.square(data-predictions))
+    denominator = np.sum(np.square(data-np.mean(data)))
+    r_squared = 1 - numerator/denominator
+    return r_squared
+
+print compute_r_squared(weather_turnstile['ENTRIESn_hourly'], predictions)
